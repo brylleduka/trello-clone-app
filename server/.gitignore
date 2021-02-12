@@ -110,4 +110,4 @@ $RECYCLE.BIN/
 lib/
 data/
 
-env
+.env
