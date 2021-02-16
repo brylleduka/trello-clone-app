@@ -17,6 +17,13 @@
       ></v-text-field>
 
       <v-text-field
+        v-model="user.email"
+        :rules="notEmptyRules"
+        label="Email"
+        required
+      ></v-text-field>
+
+      <v-text-field
         v-model="user.displayName"
         :rules="notEmptyRules"
         label="Display Name"
@@ -74,6 +81,7 @@ export default {
     valid: false,
     user: {
       username: "",
+      email: "",
       password: "",
       confirmPassword: "",
       displayName: "",
@@ -94,8 +102,7 @@ export default {
         const { User } = this.$FeathersVuex.api;
 
         const user = new User(this.user);
-        user.save({}).then((user) => {
-          console.log(user);
+        user.save({}).then(() => {
           this.$router.push("/login");
         });
       }

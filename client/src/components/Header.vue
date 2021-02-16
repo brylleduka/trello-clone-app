@@ -1,42 +1,59 @@
 <template>
-  <div id="nav">
-    <ul>
-      <li><router-link to="/">Home</router-link></li>
-      <li><router-link to="/signup">Sign up</router-link></li>
-    </ul>
+  <div>
+    <v-app-bar color="bar indigo darken-1 " dense dark>
+      <v-toolbar-title
+        ><router-link to="/" color="white"
+          >Trello Clone</router-link
+        ></v-toolbar-title
+      >
+
+      <v-spacer></v-spacer>
+
+      <v-toolbar-items v-if="!user">
+        <v-btn dense color="transparent" elevation="0" :to="{ name: 'Signup' }"
+          >Signup</v-btn
+        >
+        <v-btn
+          color="transparent"
+          elevation="0"
+          class="ml-5"
+          :to="{ name: 'Login' }"
+          >Login</v-btn
+        >
+      </v-toolbar-items>
+      <v-toolbar-items v-if="user">
+        <v-btn color="transparent" elevation="0" @click="logout">Logout</v-btn>
+      </v-toolbar-items>
+    </v-app-bar>
   </div>
 </template>
 
 <script>
+import { mapState } from "vuex";
+
 export default {
   name: "Header",
 
   data: () => ({}),
+  computed: {
+    ...mapState("auth", { user: "payload" }),
+  },
+  methods: {
+    async logout() {
+      await this.$store.dispatch("auth/logout");
+
+      await this.$router.push("/login");
+    },
+  },
 };
 </script>
 
 <style lang="scss" scoped>
-#nav {
-  display: flex;
-  padding: 30px;
-  background: #a1b5c5;
-  ul {
-    display: flex;
-    list-style: none;
-    padding: 0 5em;
-    width: auto;
-    li {
-      margin-right: 3em;
-    }
-  }
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    text-decoration: none;
-
-    &.router-link-exact-active {
-      color: #424de0;
-    }
-  }
+.bar {
+  padding: 0 4em;
+}
+a {
+  text-decoration: none;
+  color: #fff !important;
 }
 </style>

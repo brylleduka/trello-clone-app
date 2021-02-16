@@ -8,8 +8,10 @@
 <script>
 // @ is an alias to /src
 import Header from "@/components/Header.vue";
+// import { mapActions } from "vuex";
 
 export default {
+  name: "App",
   components: {
     Header,
   },
