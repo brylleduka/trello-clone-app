@@ -88,13 +88,15 @@ export default {
     ...mapActions("boards", { findBoards: "find" }),
   },
   computed: {
+    ...mapState("auth", { user: "payload" }),
     ...mapState("boards", {
       loading: "isFindPending",
       creating: "isCreatePending",
     }),
     ...mapGetters("boards", { findBoardsInStore: "find" }),
     boards() {
-      return this.findBoardsInStore({ query: {} }).data;
+      return this.findBoardsInStore({ query: { ownerId: this.user.user._id } })
+        .data;
     },
   },
 };

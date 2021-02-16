@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-app-bar color="bar indigo darken-1 " dense dark>
+    <v-app-bar color="bar blue lighten-3 ">
       <v-toolbar-title
         ><router-link to="/" color="white"
           >Trello Clone</router-link
@@ -21,8 +21,27 @@
           >Login</v-btn
         >
       </v-toolbar-items>
-      <v-toolbar-items v-if="user">
-        <v-btn color="transparent" elevation="0" @click="logout">Logout</v-btn>
+      <v-avatar v-if="user">
+        <img :src="user.user.imageUrl" :alt="user.user.displayName" />
+      </v-avatar>
+      <v-toolbar-items v-if="user" align-center>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              text
+              icon
+              elevation="0"
+              @click="logout"
+              v-bind="attrs"
+              v-on="on"
+              class="font-weight-medium"
+              ><v-icon dark>
+                mdi-logout
+              </v-icon>
+            </v-btn>
+          </template>
+          <span>Logout</span>
+        </v-tooltip>
       </v-toolbar-items>
     </v-app-bar>
   </div>
@@ -54,6 +73,7 @@ export default {
 }
 a {
   text-decoration: none;
-  color: #fff !important;
+  color: #000 !important;
+  font-weight: 700;
 }
 </style>

@@ -14,31 +14,34 @@
     <h2 class="board-title" v-if="board">{{ board.name }}</h2>
 
     <v-slide-y-transition mode="out-in">
-      <v-layout row align-center pa-5 my-5>
-        <v-row dense>
-          <ListForm :creatingList="creatingList" />
-          <!-- Board Card -->
-          <v-col cols="12" md="9" sm="12" align-self="center">
-            <v-progress-circular
-              v-if="loadingBoard || loadingLists"
-              :size="200"
-              :width="7"
-              color="primary"
-              indeterminate
-            ></v-progress-circular>
+      <v-layout row pa-5 my-5>
+        <v-progress-circular
+          v-if="loadingBoard || loadingLists"
+          :size="200"
+          :width="7"
+          color="primary"
+          indeterminate
+        ></v-progress-circular>
 
-            <v-container fluid v-if="!loadingLists">
-              <v-row dense>
-                <v-col v-for="list in lists" :key="list._id" col="12">
-                  <v-card max-width="250px" min-width="90%">
-                    <v-card-title v-text="list.name"></v-card-title>
-                  </v-card>
-                </v-col>
-              </v-row>
-            </v-container>
-          </v-col>
-          <!-- Board Card END -->
-        </v-row>
+        <v-flex row>
+          <div v-for="list in lists" :key="list._id" class="mb-3 mr-3">
+            <v-card max-width="300px" min-width="200px" width="auto">
+              <v-card-title v-text="list.name"></v-card-title>
+            </v-card>
+          </div>
+          <ListForm :creatingList="creatingList" />
+        </v-flex>
+
+        <!-- <v-container fluid v-if="!loadingLists">
+          <v-row dense>
+            <v-col v-for="list in lists" :key="list._id" col="12">
+              <v-card max-width="350px" min-width="150px">
+                <v-card-title v-text="list.name"></v-card-title>
+              </v-card>
+            </v-col>
+            <ListForm :creatingList="creatingList" />
+          </v-row>
+        </v-container> -->
       </v-layout>
     </v-slide-y-transition>
   </v-container>
