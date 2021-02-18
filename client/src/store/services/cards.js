@@ -3,25 +3,28 @@ import feathersClient, {
   BaseModel,
 } from "../../feathers-client";
 
-class List extends BaseModel {
+class Card extends BaseModel {
   constructor(data, options) {
     super(data, options);
   }
   // Required for $FeathersVuex plugin to work after production transpile.
-  static modelName = "List";
+  static modelName = "Card";
   // Define default properties here
   static instanceDefaults() {
     return {
-      name: "",
+      title: "",
+      description: "",
       order: 0,
+      listId: "",
       boardId: "",
+      members: [],
       archived: false,
     };
   }
 }
-const servicePath = "lists";
+const servicePath = "cards";
 const servicePlugin = makeServicePlugin({
-  Model: List,
+  Model: Card,
   service: feathersClient.service(servicePath),
   servicePath,
 });

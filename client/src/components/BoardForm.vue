@@ -10,7 +10,6 @@
             v-if="!creating"
             ref="form"
             v-model="valid"
-            lazy-validation
             align-center
             @submit.prevent="createBoard"
             @keydown.prevent.enter
