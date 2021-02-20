@@ -22,7 +22,15 @@
           color="green"
           indeterminate
         ></v-progress-circular>
-
+        <pre>
+          {{boardsError}}
+         
+        </pre>
+        <!-- <pre>
+           {{listsError}}
+         
+        </pre>
+        <pre> {{cardsError}}</pre> -->
         <v-flex row>
           <div v-for="list in lists" :key="list._id" class="mb-3 mr-3">
             <v-card
@@ -131,11 +139,17 @@ export default {
   computed: {
     ...mapState("boards", {
       loadingBoard: "isGetPending",
+      boardsError: 'errorOnGet'
     }),
 
     ...mapState("lists", {
       loadingLists: "isFindPending",
       creatingList: "isCreatePending",
+       listsError: 'errorOnfind'
+    }),
+        ...mapState("cards", {
+  
+       cardsError: 'errorOnfind'
     }),
 
     ...mapGetters("lists", { findListsInStore: "find" }),
