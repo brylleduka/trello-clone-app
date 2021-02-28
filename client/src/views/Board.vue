@@ -13,76 +13,69 @@
   >
     <h2 class="board-title" v-if="board">{{ board.name }}</h2>
 
-    <v-slide-y-transition mode="out-in">
-      <v-layout row pa-5 my-5>
-        <v-progress-circular
-          v-if="loadingBoard || loadingLists"
-          :size="200"
-          :width="7"
-          color="green"
-          indeterminate
-        ></v-progress-circular>
-        <pre>
-          {{boardsError}}
-         
-        </pre>
-        <!-- <pre>
-           {{listsError}}
-         
-        </pre>
-        <pre> {{cardsError}}</pre> -->
-        <v-flex row>
-          <div v-for="list in lists" :key="list._id" class="mb-3 mr-3">
-            <v-card
-              max-width="400px"
-              min-width="300px"
-              @dragover="setDroppingList($event, list)"
-              :class="{ 'teal lighten-4': droppingList == list }"
-            >
-              <v-card-title class="headline" v-text="list.name"></v-card-title>
-              <v-card-subtitle>
-                <v-container>
-                  <v-row dense v-if="cardsByListId[list._id]">
-                    <v-col
-                      v-for="card in cardsByListId[list._id]"
-                      :key="card._id"
-                      cols="12"
-                    >
-                      <v-card
-                        draggable="true"
-                        @dragstart="startDraggingCard(card)"
-                        @dragend="dropCard()"
-                        class="mb-2 drag-card"
-                      >
-                        <v-card-title>{{ card.title }}</v-card-title>
-                      </v-card>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-card-subtitle>
-              <v-card-actions>
-                <create-card
-                  :listId="list._id"
-                  :boardId="$route.params.id"
-                ></create-card>
-              </v-card-actions>
-            </v-card>
-          </div>
-          <ListForm :creatingList="creatingList" />
-        </v-flex>
+    <v-layout fluid pa-5 my-5 style="overflow-x: auto; height: 90%">
+      <v-row>
+        <v-col cols="12">
+          <v-alert
+            v-if="boardsError"
+            color="red"
+            :value="!!boardsError"
+            dense
+            type="error"
+            >{{ boardsError.message }}</v-alert
+          >
 
-        <!-- <v-container fluid v-if="!loadingLists">
-          <v-row dense>
-            <v-col v-for="list in lists" :key="list._id" col="12">
-              <v-card max-width="350px" min-width="150px">
-                <v-card-title v-text="list.name"></v-card-title>
+          <v-progress-circular
+            v-if="loadingBoard || loadingLists"
+            :size="200"
+            :width="7"
+            color="green"
+            indeterminate
+          ></v-progress-circular>
+
+          <v-container fluid class="d-inline-flex " v-if="!boardsError">
+            <div v-for="list in lists" :key="list._id" class="mb-5 mr-5">
+              <v-card
+                min-width="300px"
+                @dragover="setDroppingList($event, list)"
+                :class="{ 'teal lighten-4': droppingList == list }"
+              >
+                <v-card-title
+                  class="headline"
+                  v-text="list.name"
+                ></v-card-title>
+                <v-card-subtitle v-if="cardsByListId[list._id]">
+                  <v-container
+                    v-for="card in cardsByListId[list._id]"
+                    :key="card._id"
+                  >
+                    <v-card
+                      draggable="true"
+                      @dragstart="startDraggingCard(card)"
+                      @dragend="dropCard()"
+                      class="mb-2 drag-card"
+                    >
+                      <v-card-title>{{ card.title }}</v-card-title>
+                    </v-card>
+                  </v-container>
+                </v-card-subtitle>
+                <v-card-actions>
+                  <CreateCard
+                    :listId="list._id"
+                    :boardId="$route.params.id"
+                    :createActivity="createActivity"
+                  ></CreateCard>
+                </v-card-actions>
               </v-card>
-            </v-col>
-            <ListForm :creatingList="creatingList" />
-          </v-row>
-        </v-container> -->
-      </v-layout>
-    </v-slide-y-transition>
+            </div>
+            <ListForm
+              :creatingList="creatingList"
+              :createActivity="createActivity"
+            />
+          </v-container>
+        </v-col>
+      </v-row>
+    </v-layout>
   </v-container>
 </template>
 
@@ -113,12 +106,20 @@ export default {
         boardId: this.$route.params.id,
       },
     });
+
+    await this.findActivities({
+      query: {
+        boardId: this.$route.params.id,
+      },
+    });
   },
 
   methods: {
     ...mapActions("boards", { getBoard: "get" }),
     ...mapActions("lists", { findLists: "find" }),
     ...mapActions("cards", { findCards: "find" }),
+    ...mapActions("activities", { findActivities: "find" }),
+
     startDraggingCard(card) {
       this.draggingCard = card;
     },
@@ -126,34 +127,59 @@ export default {
       this.droppingList = list;
       event.preventDefault();
     },
-    dropCard() {
+    async dropCard() {
       if (this.droppingList) {
-        this.draggingCard.listId = this.droppingList._id;
-        this.draggingCard.save();
+        //Check if card is not on the same
+        if (this.draggingCard.listId !== this.droppingList._id) {
+          const fromList = this.lists.find(
+            (list) => list._id === this.draggingCard.listId
+          );
+
+          // const toList = this.lists.find(
+          //   (list) => list._id === this.droppingList._id
+          // );
+
+          this.draggingCard.listId = this.droppingList._id;
+          await this.draggingCard.save();
+
+          this.createActivity(
+            `moved **${this.draggingCard.title}** card from **${fromList.name}** to **${this.droppingList.name}** list`
+          );
+        }
       }
 
       this.droppingList = null;
       this.draggingCard = null;
     },
+
+    // Creating Activity logs
+    async createActivity(text) {
+      const { Activity } = this.$FeathersVuex.api;
+      const activity = await new Activity();
+      activity.text = `**${this.user.user.displayName}** ${text}`;
+      activity.boardId = this.$route.params.id;
+      await activity.save();
+    },
   },
   computed: {
+    ...mapState("auth", { user: "payload" }),
     ...mapState("boards", {
       loadingBoard: "isGetPending",
-      boardsError: 'errorOnGet'
+      boardsError: "errorOnGet",
     }),
 
     ...mapState("lists", {
       loadingLists: "isFindPending",
       creatingList: "isCreatePending",
-       listsError: 'errorOnfind'
+      listsError: "errorOnfind",
     }),
-        ...mapState("cards", {
-  
-       cardsError: 'errorOnfind'
+    ...mapState("cards", {
+      cardsError: "errorOnfind",
     }),
 
     ...mapGetters("lists", { findListsInStore: "find" }),
     ...mapGetters("cards", { findCardsInStore: "find" }),
+
     lists() {
       return this.findListsInStore({
         query: {
@@ -182,10 +208,8 @@ export default {
 
 <style lang="scss" scoped>
 .full-height {
-  border: 1px solid #000;
-
   height: 100%;
-  min-height: 100vh;
+  min-height: 200vh;
 }
 .bg-image {
   background-size: cover;

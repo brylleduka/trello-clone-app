@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-app-bar color="bar blue lighten-3 ">
+    <v-app-bar color="blue darken-4" dark elevate-on-scroll>
       <v-toolbar-title
         ><router-link to="/" color="white"
           >Trello Clone</router-link
@@ -10,20 +10,25 @@
       <v-spacer></v-spacer>
 
       <v-toolbar-items v-if="!user">
-        <v-btn dense color="transparent" elevation="0" :to="{ name: 'Signup' }"
+        <v-btn text color="white" elevation="0" :to="{ name: 'Signup' }"
           >Signup</v-btn
         >
         <v-btn
-          color="transparent"
+          text
+          color="white"
           elevation="0"
           class="ml-5"
           :to="{ name: 'Login' }"
           >Login</v-btn
         >
       </v-toolbar-items>
-      <v-avatar v-if="user">
-        <img :src="user.user.imageUrl" :alt="user.user.displayName" />
-      </v-avatar>
+      <div class="mr-3">
+        <strong class="mr-3">{{ user && user.user.displayName }}</strong>
+        <v-avatar v-if="user">
+          <img :src="user.user.imageUrl" :alt="user.user.displayName" />
+        </v-avatar>
+      </div>
+
       <v-toolbar-items v-if="user" align-center>
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
@@ -43,25 +48,94 @@
           <span>Logout</span>
         </v-tooltip>
       </v-toolbar-items>
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
     </v-app-bar>
+
+    <v-navigation-drawer
+      v-model="drawer"
+      right
+      absolute
+      temporary
+      hide-overlay
+      width="350"
+    >
+      <v-list-item class="px-2">
+        <v-list-item-title>Activities</v-list-item-title>
+
+        <v-btn icon @click.stop="drawer = !drawer">
+          <v-icon>mdi-chevron-right</v-icon>
+        </v-btn>
+      </v-list-item>
+
+      <v-list dense three-line>
+        <v-list-item v-for="activity in activitiesByDate" :key="activity._id">
+          <v-list-item-icon>
+            <v-icon color="green">
+              mdi-ticket
+            </v-icon>
+          </v-list-item-icon>
+
+          <!-- <v-list-item-content>
+            <v-list-item-title
+              v-text="activity.user.displayName"
+            ></v-list-item-title>
+            <v-list-item-subtitle
+              v-html="markdownify(activity.text)"
+            ></v-list-item-subtitle>
+          </v-list-item-content> -->
+          <div>
+            <h4>{{ activity.user.displayName }}</h4>
+            <div
+              v-html="markdownify(activity.text)"
+              style="word-wrap: break-word; max-width: 200px"
+            ></div>
+          </div>
+
+          <v-list-item-avatar>
+            <v-img :src="activity.user.imageUrl"></v-img>
+          </v-list-item-avatar>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
   </div>
 </template>
 
 <script>
-import { mapState } from "vuex";
+import marked from "marked";
+import { mapState, mapGetters } from "vuex";
 
 export default {
   name: "Header",
 
-  data: () => ({}),
-  computed: {
-    ...mapState("auth", { user: "payload" }),
-  },
+  data: () => ({
+    drawer: false,
+  }),
+
   methods: {
+    markdownify(text) {
+      return marked(text);
+    },
     async logout() {
       await this.$store.dispatch("auth/logout");
 
       await this.$router.push("/login");
+    },
+  },
+
+  computed: {
+    ...mapState("auth", { user: "payload" }),
+
+    ...mapGetters("activities", { findActivitiesInStore: "find" }),
+
+    activities() {
+      return this.findActivitiesInStore({
+        query: {
+          boardId: this.$route.params.id,
+        },
+      }).data;
+    },
+    activitiesByDate() {
+      return this.activities.slice().reverse();
     },
   },
 };
@@ -73,7 +147,7 @@ export default {
 }
 a {
   text-decoration: none;
-  color: #000 !important;
+  color: #fff !important;
   font-weight: 700;
 }
 </style>

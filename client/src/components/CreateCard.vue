@@ -44,8 +44,8 @@
 </template>
 <script>
 export default {
-  name: "create-card",
-  props: ["listId", "boardId"],
+  name: "CreateCard",
+  props: ["listId", "boardId", "createActivity"],
   data: () => ({
     creatingCard: false,
     validCard: false,
@@ -73,9 +73,11 @@ export default {
 
         this.card = {
           title: "",
-
           members: [],
         };
+        this.createActivity(
+          `created card **${card.title}** on **${card.list.name}**`
+        );
       }
     },
   },

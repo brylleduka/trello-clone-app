@@ -1,7 +1,7 @@
 <template>
   <!-- <v-col cols="12" md="3" sm="12"> -->
-  <div>
-    <v-card max-width="400">
+  <v-container>
+    <v-card width="300">
       <v-card-title class="headline">Create List</v-card-title>
 
       <!-- Form -->
@@ -33,15 +33,15 @@
           </v-card-actions>
         </v-form>
       </v-card-subtitle>
+      <v-progress-circular
+        v-if="creatingList"
+        :size="70"
+        :width="7"
+        color="primary"
+        indeterminate
+      ></v-progress-circular>
     </v-card>
-    <v-progress-circular
-      v-if="creatingList"
-      :size="70"
-      :width="7"
-      color="primary"
-      indeterminate
-    ></v-progress-circular>
-  </div>
+  </v-container>
   <!-- </v-col> -->
 </template>
 
@@ -50,6 +50,7 @@ export default {
   name: "ListForm",
   props: {
     creatingList: Boolean,
+    createActivity: Function,
   },
   data: () => ({
     validList: false,
@@ -67,7 +68,7 @@ export default {
         const { List } = this.$FeathersVuex.api;
         this.list.boardId = this.$route.params.id;
 
-        const list = await new List(this.list);
+        const list = new List(this.list);
         await list.save();
 
         this.list = {
@@ -75,6 +76,8 @@ export default {
           order: 0,
           archived: false,
         };
+
+        this.createActivity(`created list **${list.name}**`);
       }
     },
   },
