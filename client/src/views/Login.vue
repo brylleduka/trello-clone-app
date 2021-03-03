@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container fluid class="full-height">
     <v-slide-y-transition mode="out-in">
       <v-layout column align-center>
         <LoginForm />
@@ -16,3 +16,11 @@ export default {
   components: { LoginForm },
 };
 </script>
+<style scoped>
+.full-height {
+  height: 50vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+</style>

@@ -1,6 +1,7 @@
 <template>
   <div>
     <v-form
+      y-12
       v-if="!loading"
       ref="form"
       v-model="valid"
@@ -45,6 +46,7 @@
 
 <script>
 import { mapState } from "vuex";
+import { notEmptyRules } from "@/utils/validators.js";
 
 export default {
   name: "LoginForm",
@@ -54,7 +56,7 @@ export default {
       username: "",
       password: "",
     },
-    notEmptyRules: [(value) => !!value || "Can not be empty"],
+    notEmptyRules,
   }),
   computed: {
     ...mapState("auth", { loading: "isAuthenticatePending" }),
@@ -63,27 +65,12 @@ export default {
     // ...mapActions("auth", ["authenticate"]),
     async login() {
       try {
-        if (this.valid) {
-          //option1
-          // const auth = await this.authenticate({
-          //   strategy: "local",
-          //   ...this.user,
-          // });
+        await this.$store.dispatch("account/login", {
+          valid: this.valid,
+          user: this.user,
+        });
 
-          //option2
-          const auth = await this.$store.dispatch("auth/authenticate", {
-            strategy: "local",
-            ...this.user,
-          });
-
-          if (auth) await this.$router.push("/boards");
-          // .then(() => {
-          //   this.$router.push("/");
-          // })
-          // .catch((e) => {
-          //   console.error("Authentication error", e);
-          // });
-        }
+        // if (auth) await this.$router.push("/boards");
       } catch (error) {
         console.error("Authentication error", error);
       }

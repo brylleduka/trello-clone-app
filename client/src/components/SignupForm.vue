@@ -6,7 +6,7 @@
       v-model="valid"
       lazy-validation
       align-center
-      @submit.prevent="signUp"
+      @submit.prevent="toSignUp"
       @keydown.prevent.enter
     >
       <v-text-field
@@ -74,7 +74,7 @@
 
 <script>
 import { mapState } from "vuex";
-
+import { notEmptyRules } from "@/utils/validators.js";
 export default {
   name: "SignupForm",
   data: (vm) => ({
@@ -87,7 +87,7 @@ export default {
       displayName: "",
       imageUrl: "",
     },
-    notEmptyRules: [(value) => !!value || "Can not be empty"],
+    notEmptyRules,
     confirmPasswordRules: [
       (confirmPassword) =>
         confirmPassword === vm.user.password || "Password do not matched",
@@ -97,15 +97,11 @@ export default {
     ...mapState("users", { loading: "isCreatePending" }),
   },
   methods: {
-    signUp() {
-      if (this.valid) {
-        const { User } = this.$FeathersVuex.api;
-
-        const user = new User(this.user);
-        user.save({}).then(() => {
-          this.$router.push("/login");
-        });
-      }
+    async toSignUp() {
+      await this.$store.dispatch("account/signUp", {
+        user: this.user,
+        valid: this.valid,
+      });
     },
   },
 };

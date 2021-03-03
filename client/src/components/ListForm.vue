@@ -1,6 +1,7 @@
 <template>
   <!-- <v-col cols="12" md="3" sm="12"> -->
-  <v-container>
+  <!-- <v-container> -->
+  <div>
     <v-card width="300">
       <v-card-title class="headline">Create List</v-card-title>
 
@@ -41,7 +42,8 @@
         indeterminate
       ></v-progress-circular>
     </v-card>
-  </v-container>
+  </div>
+  <!-- </v-container> -->
   <!-- </v-col> -->
 </template>
 

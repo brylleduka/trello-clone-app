@@ -1,7 +1,7 @@
 <template>
   <v-container
     fluid
-    pa-12
+    pa-15
     ma-0
     :style="{
       'background-image':
@@ -13,7 +13,7 @@
   >
     <h2 class="board-title" v-if="board">{{ board.name }}</h2>
 
-    <v-layout fluid pa-5 my-5 style="overflow-x: auto; height: 90%">
+    <v-layout fluid pa-5 my-5 id="slider" class="list-container">
       <v-row>
         <v-col cols="12">
           <v-alert
@@ -44,7 +44,10 @@
                   class="headline"
                   v-text="list.name"
                 ></v-card-title>
-                <v-card-subtitle v-if="cardsByListId[list._id]">
+                <v-card-subtitle
+                  v-if="cardsByListId[list._id]"
+                  class="list-card"
+                >
                   <v-container
                     v-for="card in cardsByListId[list._id]"
                     :key="card._id"
@@ -68,6 +71,7 @@
                 </v-card-actions>
               </v-card>
             </div>
+
             <ListForm
               :creatingList="creatingList"
               :createActivity="createActivity"
@@ -143,7 +147,7 @@ export default {
           await this.draggingCard.save();
 
           this.createActivity(
-            `moved **${this.draggingCard.title}** card from **${fromList.name}** to **${this.droppingList.name}** list`
+            `moved card **${this.draggingCard.title}** from **${fromList.name}** to **${this.droppingList.name}**`
           );
         }
       }
@@ -207,9 +211,29 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  box-shadow: inset 0 0 3px rgb(11, 70, 126);
+  -webkit-box-shadow: inset 0 0 3px rgba(11, 70, 126, 1);
+  background: rgb(54, 134, 209);
+}
+
 .full-height {
   height: 100%;
-  min-height: 200vh;
+  max-height: 100vh;
+  background: #000;
+
+  .list-container {
+    width: 90%;
+    height: 90%;
+    overflow-y: auto;
+  }
 }
 .bg-image {
   background-size: cover;
@@ -219,6 +243,10 @@ export default {
   padding: 0 0.5em;
   color: rgb(255, 255, 255);
   font-size: 3em;
+}
+.list-card {
+  max-height: 50vh;
+  overflow-y: auto;
 }
 .drag-card {
   cursor: move;
